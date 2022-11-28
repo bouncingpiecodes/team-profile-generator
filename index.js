@@ -2,6 +2,7 @@ const inquirer = require("inquirer");
 const Manager = require("./lib/Manager");
 const Engineer = require("./lib/Engineer");
 const Intern = require("./lib/Intern");
+const fs = require("fs");
 const engineers = [];
 const interns = [];
 let manager;
@@ -44,7 +45,7 @@ const createTeamMenu = () => {
         type: "list",
         name: "option",
         message: "Who would you like to add to the team?",
-        choices: ["engineer", "intern"],
+        choices: ["engineer", "intern", "done"],
       },
     ])
     .then((answers) => {
@@ -52,8 +53,58 @@ const createTeamMenu = () => {
         createEngineer();
       } else if (answers.option === "intern") {
         createIntern();
+      } else {
+        generateWebpage();
       }
     });
+};
+const generateWebpage = () => {
+  const html = `<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <link rel="stylesheet" href="style.css" />
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>team</title>
+  </head>
+  <body>
+    <h1>My Team</h1>
+    <div class="container">
+       ${[manager, ...engineers, ...interns].map((person) => {
+         return `<div class="card">
+        <div class="card-header">
+          <h2>Kara</h2>
+          <h2>Role: ${person.getRole()}</h2>
+        </div>
+        <div class="card-content">
+          <div class="card-property">id: ${person.getId()}</div>
+          <div class="card-property">email: <a href="mailto:${person.getEmail()}"> ${person.getEmail()}</a> </div>
+          <div class="card-property">${
+            person.getRole() === "Manager"
+              ? `office number: ${person.getOfficeNumber()}`
+              : ""
+          } 
+          ${
+            person.getRole() === "Engineer"
+              ? `github: <a href="https://github.com/${person.getGithub()}">${person.getGithub()}</a>`
+              : ""
+          }
+          ${
+            person.getRole() === "Intern" ? `school: ${person.getSchool()}` : ""
+          }</div>
+        </div>
+      </div>`;
+       })}
+      
+    </div>
+  </body>
+</html>
+`;
+  fs.writeFileSync("./dist/index.html", html);
+  fs.copyFile("./style.css", "./dist/style.css", (error) => {
+    return null;
+  });
 };
 const createEngineer = () => {
   const questions = [
